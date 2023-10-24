@@ -1,0 +1,83 @@
+
+<?php
+session_start();
+?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <!-- Google Fonts -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+
+<!-- CSS Reset -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
+
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        
+<!-- Milligram CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
+
+<!-- You should properly set the path from the main file. -->
+<link rel="stylesheet" href="/public/styles/styles.css">
+    <title>Images gallery</title>
+
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <script differ>
+        function debounce(func, timeout = 300){
+            let timer;
+            return (...args) => {
+                clearTimeout(timer);
+                timer = setTimeout(() => { func.apply(this, args); }, timeout);
+            };
+        }
+        function defaultMenuState(){
+            if (document.readyState == 'complete') {
+                if(document.body.clientWidth < 768){
+                    if(document.querySelector('#menu').checked) {document.querySelector('#menu').checked = false;}
+                } else {
+                    if(!document.querySelector('#menu').checked) {document.querySelector('#menu').checked = true;}
+                }
+            }
+        }
+        const processFunc = debounce(() => defaultMenuState());
+        window.addEventListener("load", (event) => {
+            defaultMenuState();
+        });
+        window.addEventListener("resize", function(event) {
+            processFunc();
+        })
+            
+    </script>
+</head>
+<body class="container">
+    <nav class="collapsible-menu">
+            <input type="checkbox" id="menu" checked>
+            <label for="menu">&nbsp;&nbsp;&nbsp;Images gallery</label>
+            <div class="menu-content">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li>
+                        <a href="/gallery/showmine">
+                        <?php if(isset($_SESSION['id'])){
+                            echo $_SESSION['username'].'\'s gallery';
+                        } else {
+                            echo 'My gallery';
+                        } ?>
+                        </a>
+                    </li>
+                    <li><a href="/gallery/upload">Upload new image</a></li>
+
+                    <?php if(isset($_SESSION['id'])){
+                        echo '<li><a href="/user/logout">Log out</a></li>';
+                    } else {
+                        echo '<li><a href="/user/login">Log in</a></li>';
+                    } ?>
+                </ul>
+            </div>
+    </nav><br>

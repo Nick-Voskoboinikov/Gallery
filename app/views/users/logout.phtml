@@ -1,0 +1,15 @@
+<?php
+
+if( !isset($_SESSION['id']) ){
+    header('Location: /');
+} else {
+    unset($_SESSION['username']);
+    unset($_SESSION['id']);
+    echo '<script>swal("🎉 Congrats! 🎉", "You\'ve been logged out successfully.", "success")
+                    .then(() => {
+                        window.location.href="/";
+                    });;</script>';
+}
+
+?>
+<h1>Logging out</h1>

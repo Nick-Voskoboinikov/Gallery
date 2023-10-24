@@ -1,0 +1,157 @@
+<?php
+
+$errors = [];
+$messages = [];
+
+$imageFileFullName = $_GET['name'] ?? '';
+$ids = App\config\DB::getAllGalleries();
+$imageFileName=$imageFileFullName;
+foreach ($ids as $gallery) {
+    $gal=md5($gallery['created'].$gallery['id']);
+    if(str_starts_with($imageFileFullName,$gal)){
+        $imageFileName=str_replace($gal,'',$imageFileFullName);
+    }
+  }
+$commentFilePath = COMMENT_DIR . $imageFileFullName . '.txt';
+//
+
+// Если коммент был отправлен
+if(!empty($_POST['comment'])) {
+
+    $comment = trim($_POST['comment']);
+
+    // Валидация коммента
+    if($comment === '') {
+        $errors[] = 'No text added';
+    }
+
+    // Если нет ошибок записываем коммент
+    if(empty($errors)) {
+
+        // Чистим текст, земеняем переносы строк на <br/>, дописываем дату
+        $comment = strip_tags($comment);
+        $comment = nl2br($comment);
+        $comment = str_replace("\n\r",'',$comment);
+        $comment = str_replace("\n",'',$comment);
+        $comment = str_replace("\r",'',$comment);
+        $comment = '<span data-owner="'.$_SESSION['id'].'">' .date('d.m.y H:i') . ' ('.$_SESSION['username'].'): ' . $comment.'</span>';
+
+        // Дописываем текст в файл (будет создан, если еще не существует)
+        file_put_contents($commentFilePath,  $comment . "\n", FILE_APPEND);
+
+        $messages[] = 'Comment added';
+    }
+}
+
+// Получаем список комментов
+$comments = file_exists($commentFilePath)
+    ? file($commentFilePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES)
+    : [];
+
+if(!empty($_POST['delarea'])) {
+    if(isset($_SESSION['id'])){
+    $toDelete = trim($_POST['delarea']);
+    $toDelete = urldecode($toDelete);
+        $toDelete = str_replace('<br>','<br />',$toDelete);
+        if(str_starts_with($toDelete,'<span data-owner="'.$_SESSION['id'].'">')){
+                 $index = array_search($toDelete,$comments);
+                 if($index !== false){
+                    unset($comments[$index]);
+                 } else {
+                    $errors[] = 'Comment not found.';
+                 }
+
+                 if(empty($errors)) {
+                 $commentFileHandle = fopen($commentFilePath, 'w') or die("Unable to open file!");
+                 fwrite($commentFileHandle,implode(PHP_EOL, $comments));
+                 fclose($commentFileHandle);
+                
+                 $messages[] = 'Comment removed';
+                 }
+        } else {
+            $errors[] = 'You cannot delete a 3rd party comment.';
+        }
+    }
+}
+
+if(!empty($_POST['filetodelete'])) {
+    echo '<pre>';
+    var_dump(UPLOAD_DIR . $_SESSION['id'] . DIRECTORY_SEPARATOR . $_POST['filetodelete']);
+    echo '</pre>';
+
+        $filePath = UPLOAD_DIR . $_SESSION['id'] . DIRECTORY_SEPARATOR . $_POST['filetodelete'];
+        $commentPath = COMMENT_DIR . $_SESSION['id'] .  $_POST['filetodelete'] . '.txt';
+
+        ///delete image
+        if(file_exists($filePath)) {
+        unlink($filePath);
+        } else {
+            $errors[] = 'No image found.';
+        }
+
+        if(file_exists($commentPath)) {
+            unlink($commentPath);
+        }
+        header('Location: /');
+}
+
+?>
+
+    <h1 class="mb-4">Viewing &laquo;<?=pathinfo($imageFileName)['filename']; ?>&raquo;</h1>
+
+<div class="container pt-4">
+
+
+    <!-- Вывод сообщений об успехе/ошибке -->
+    <?php foreach ($errors as $error): ?>
+        <div class="alert alert-danger"><?php echo $error; ?></div>
+    <?php endforeach; ?>
+
+    <?php foreach ($messages as $message): ?>
+        <div class="alert alert-success"><?php echo $message; ?></div>
+    <?php endforeach; ?>
+
+    <div class="row">
+        <div class="col-12 col-sm-8 offset-sm-2">
+
+            <img src="<?php echo URL . '/public/uploads/' . str_replace($imageFileName,'',$imageFileFullName) . '/' . $imageFileName; ?>" class="img-thumbnail mb-4"
+                 alt="<?php echo $imageFileName ?>">
+            <?php if(str_replace($imageFileName,'',$imageFileFullName) == $_SESSION['id']){
+                echo '<form method="post"><input type="button" name="delfile" class="delfile" value="Delete file" /><input type="hidden" name="filetodelete" value="'.$imageFileName.'" /></form>';
+            }
+            ?>
+            <h3>Comments</h3>
+            <?php if(!empty($comments)): ?>
+                <?php foreach ($comments as $key => $comment): ?>
+                    <p class="<?php echo (($key % 2) > 0) ? 'bg-light' : ''; ?>" > <?php echo $comment;
+                    if(isset($_SESSION['id'])){
+                        if(str_contains($comment,'<span data-owner="'.$_SESSION['id'].'">')){ echo '<span class="delete" ></span>';}
+                 } ?></p>
+                    <?php ?>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p class="text-muted">Yet no comments here, be the first one to comment it out!</p>
+            <?php endif; ?>
+
+            <!-- Форма добавления комментария -->
+            <form method="post">
+                <div class="form-group">
+                    <label for="comment">Your comment</label>
+                    <?php if(isset($_SESSION['id'])){
+                        echo '<textarea class="form-control" id="comment" name="comment" rows="3" required></textarea>';
+                    }else{
+                        echo '<a href="/user/login" >Log in</a> to leave comments';
+                    } ?>
+                </div>
+                <hr>
+                <?php if(isset($_SESSION['id'])){
+                        echo '<button type="submit" class="btn btn-primary">Send</button>
+            </form>';
+                    } ?>
+        </div>
+    </div><!-- /.row -->
+
+</div><!-- /.container -->
+
+<!-- Optional JavaScript -->
+<script src="/public/js/deletions.js"></script>

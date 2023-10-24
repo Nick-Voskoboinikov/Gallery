@@ -1,0 +1,80 @@
+<?php
+
+/*$myUser=App\config\DB::getUserByMail('em@i.l');
+
+echo '<pre>';
+print_r($myUser);
+echo "\nhash".md5($myUser['created'].$myUser['id']);
+echo '</pre>';*/
+
+$email = $emailErr = $password = $passwordErr ='';
+if(isset($_SESSION['id'])){
+    header('Location: /');
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    if (empty($_POST["email"])) {
+      $emailErr = "Email is required";
+    } else {
+      $email = test_input($_POST["email"]);
+      if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $emailErr = "Invalid email format";
+      }
+    }
+        if (empty($_POST["password"])) {
+            $passwordErr = "Your password cannot be empty";
+        }
+    
+    if( (!$emailErr) && (!$passwordErr) ){
+        $email=htmlspecialchars(strip_tags($_POST["email"]), ENT_QUOTES);
+        $userExists = App\config\DB::getUserByMail($email);
+        if($userExists) {
+            $password=htmlspecialchars(strip_tags($_POST["password"]), ENT_QUOTES);
+            if (password_verify($password, $userExists['password'])) {
+                $_SESSION['id'] = md5($userExists['created'] . $userExists['id']);;
+                $_SESSION['username'] = $userExists['user'];
+                echo '<script>
+                        swal("🎉 Huraah! 🎉", "You\'ve been logged in successfully.", "success")
+                        .then(() => {history.go(-2);});
+                      </script>';
+            }
+            else {
+                $passwordErr = "Double-check your password. ";
+            }
+        }
+    } else {
+        $passwordErr = "Your log in attempt failed.";
+    }
+
+    
+
+}
+
+
+function test_input($data) {
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+    return $data;
+  }
+
+?>
+<form  method="post" action="<?php echo str_replace('/index.php','', htmlspecialchars($_SERVER["PHP_SELF"]) );?>" autocomplete="off" >
+    <h1 class="title">Log into your account</h1>
+        <fieldset><legend>Log into your account here</legend>
+
+    <label for="email">Email <sup>*<span class="required">Mandatory field</span></sup></label>
+        <input type="email" name="email" id="email" placeholder="E-mail" required value="<?=$email;?>" >
+        <span class="error"><?php echo $emailErr;?></span>
+
+    <label for="password">Password <sup>*<span class="required">Mandatory field</span></sup></label>
+        <input type="password" name="password" id="password" placeholder="Password" required value="<?=$password;?>" >
+        <span class="error"><?=$passwordErr;?></span>
+
+    <br><input type="submit" value="Log in">
+</fieldset>
+</form>
+        <div class="link">
+            No account yet? <a href="/user/create">Sign up</a>
+        </div>

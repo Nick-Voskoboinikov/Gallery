@@ -1,0 +1,23 @@
+<?php
+
+
+if(!empty($payload)){
+    $post = App\config\DB::post($payload);
+} else {
+    $post = App\config\DB::post(1);
+}
+?>
+
+<div class="cards">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <?= $post['title'] ?>
+                </h5>
+                <p class="card-body">
+                    <?= $post['body'] ?>
+                </p>
+                <a href="/post" class="link">Read all</a>
+            </div>
+        </div>
+</div>

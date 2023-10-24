@@ -1,0 +1,28 @@
+<?php
+
+
+function appendFolder(&$folder, $key, $prefix){
+    $folder = "$prefix$folder";
+}
+if(!isset($_SESSION['id'])){
+    echo '<h2>Log in to view your gallery</h2>
+    <p>Being <a href="/user/login" >logged in</a> is crucial for operation, including view your own gallery feature</p>';
+}else {
+    $files = scandir(UPLOAD_DIR . DIRECTORY_SEPARATOR . $_SESSION['id']);
+    $files = array_filter($files, function ($file) {
+        return !in_array($file, ['.', '..', '.gitkeep']);
+    });
+    array_walk($files, 'appendFolder', '/public/uploads/'.$_SESSION['id'].'/');
+    echo '<h1>My gallery</h1>
+<div id="id'.$_SESSION['id'].'">
+        <div class="slider">
+            <input type="hidden" class="files" value="'.implode('*',$files).'" />
+            <button class="prev-button">&laquo;</button>
+            <button class="next-button">&raquo;</button>
+            <div class="slider-line"></div>
+        </div>
+</div>
+        <script src="/public/js/slider.js" ></script>
+
+';
+}

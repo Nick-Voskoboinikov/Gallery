@@ -1,0 +1,204 @@
+body {
+    background-color: aliceblue;
+}
+.menu-content {
+    max-height: 0;
+    overflow: hidden;
+    font-family: 'Oswald', sans-serif; 
+    padding: 0 0 0 25px;
+}
+.collapsible-menu {
+    background-color: rgb(255, 255, 255);
+    border-bottom: 3px solid #CDE700;
+    box-shadow: 1px 2px 3px rgba(0,0,0,0.2);
+}
+.collapsible-menu ul {
+    list-style-type: none;
+    padding: 0;
+    margin-block-start: -.5em;
+    display: flex;
+    align-items: flex-end;
+    gap: 0.01em;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-content: flex-end;
+    flex-direction: column;
+}
+.collapsible-menu ul > li {
+    padding-right: 1em;
+}
+.collapsible-menu a {
+    display:block;
+    padding: 10px;
+    text-decoration: none;
+}
+
+
+.collapsible-menu label {
+    font-family: 'Sedgwick Ave Display', cursive;
+    font-size: 36px;
+    display: block;
+    cursor: pointer;
+    background: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%22.5 0 10 10%22><text y=%22.9em%22 font-size=%229%22>&%239776;</text></svg>') no-repeat left center;
+    padding: 0;
+    margin-left: 5px;
+}
+input#menu {
+    display: none;
+}
+
+input:checked +label {
+    background-image: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%221 0 10 10%22><text y=%22.9em%22 font-size=%229%22>&%2310060;</text></svg>');
+}
+
+input:checked ~ .menu-content {
+    max-height: 100%;
+}
+@media (min-width: 768px) {
+    .menu-content {
+        margin-bottom: -1.5em;
+    }
+    input:checked +label {
+        display: none;
+    }
+    .collapsible-menu ul {
+        gap: 2em;
+        flex-direction: row;
+    }
+    .collapsible-menu ul > li:last-child {
+    padding-right: 2em;
+    }
+}
+
+form>fieldset {
+    border: 1px solid #7020b2;
+    margin: 10px;
+    padding: 5px;
+}
+
+form>fieldset>legend {
+    padding: 0.2em 0.5em;
+    border: 2px solid #7020b2;
+    text-align: left;
+}
+label>sup {
+    color: red;
+}
+.error {
+    color: #FF0000;
+}
+.error:not(:empty) {
+    display: inline-block;
+    padding-bottom: 1.5em;
+}
+
+
+sup .required {
+    position: relative;
+    bottom: 5px;
+    left: 0px;
+    visibility: hidden;
+    padding: 3px;
+    background-color: #ced3d5;
+    border: 1px solid #000;
+}
+
+sup:hover .required {
+    visibility: visible;
+}
+
+.link > a , .error > a {
+    font-weight: 600;
+    text-decoration: underline;
+ }
+
+div.swal-footer > div.swal-button-container > button.swal-button--confirm,
+div.swal-footer > div.swal-button-container > button.swal-button--cancel {
+    line-height: 2.5rem;
+ }
+
+ 
+.slider {
+    width: 500px;
+    height: 500px;
+    margin: 0 auto;
+    position: relative;
+    margin-top: 2rem;
+}
+
+.slider-line {
+    display: flex;
+    position: relative;
+    left : -500px;
+}
+
+.slider img {
+    max-width: 500px;
+    width: 100%;
+    /* transition: all ease 1s; */
+}
+
+.prev-button, .next-button {
+    cursor: pointer;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    background: transparent;
+    color: #fff;
+    position: absolute;
+    margin-top: 48%;
+    z-index: 1000;
+    left: 14px;
+    font-size: 2rem;
+    line-height: 2rem;
+    box-shadow: 3px 3px 3px #000;
+}
+
+.prev-button:active, .next-button:active {
+    background: #c0c0c0;
+}
+
+.next-button {
+    left: auto;
+    right: 14px;
+}
+
+p>span.delete{
+    text-align: right;
+    color:red;
+}
+p>span.delete:before{
+    content: '❌';
+    display: block;
+    position: relative;
+    text-align: right;
+}
+p>span.delete:after{
+    content: 'Remove comment';
+    display: inline-block;
+    position: relative;
+    top: -50px;
+    right: -56%;
+    visibility: hidden;
+    padding: 3px;
+    background-color: #ced3d5;
+    border: 1px solid #000;
+    border-radius: 3px;
+    z-index: 2;
+}
+p>span.delete:hover:after{
+    visibility: visible;
+}
+.hiddenform{
+    display: none;
+}
+form>input[type="button"].delfile {
+    background-color: #cccccc;
+}
+form>input[type="button"].delfile:hover {
+    background-color: #ff0000;
+}
+form:has(input[type="button"].delfile){
+    text-align: right;
+}

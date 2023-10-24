@@ -1,0 +1,37 @@
+<?php
+
+function appendFolder(&$folder, $key, $prefix){
+    $folder = "$prefix$folder";
+}
+function showGallery($galeryId){
+    $files = scandir(UPLOAD_DIR . DIRECTORY_SEPARATOR . $galeryId);
+    $files = array_filter($files, function ($file) {
+        return !in_array($file, ['.', '..', '.gitkeep']);
+    });
+    array_walk($files, 'appendFolder', '/public/uploads/'.$galeryId.'/');
+ return '
+<div id="id'.$galeryId.'">
+ <div class="slider">
+        <button class="prev-button">&laquo;</button>
+        <button class="next-button">&raquo;</button>
+        <input type="hidden" class="files" value="'.implode('*',$files).'" />
+        <div class="slider-line"></div>
+    </div>
+</div>
+<hr>';
+}
+
+if(!isset($_SESSION['id'])){
+    $randomGal = App\config\DB::getRandomGallery();
+    echo '<h1>A random user\'s image gallery</h1>';
+    echo showGallery($randomGal);
+}else{
+    $ids = App\config\DB::getAllGalleries();
+    echo '<h1>Other users\' galleries</h1>';
+    foreach( $ids as $id ) {
+        echo showGallery(md5($id['created'].$id['id']));
+    }
+
+}
+echo '<script src="/public/js/slider.js"></script>';
+

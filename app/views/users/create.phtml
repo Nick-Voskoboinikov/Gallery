@@ -1,0 +1,109 @@
+<?php
+
+$nameErr = $emailErr = $passwordErr = "";
+$username = $email = $password = "";
+
+if(isset($_SESSION['id'])){
+    header('Location: /');
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  if (empty($_POST["username"])) {
+    $nameErr = "Name is required";
+  } else {
+    $username = test_input($_POST["username"]);
+    // check if name only contains letters and whitespace
+    if (strlen($_POST["username"]) < 3) {
+        $nameErr = "Your username must contain at least 3 characters!";
+    }
+    if (!preg_match("/^[\d\w\-_'\x{0401}\x{0451}\x{0410}-\x{044f}]*$/u",$username)) { /* digits, Latin, Russian Cyrillic */
+      $nameErr = "Only numbers and letters allowed";
+    }
+  }
+  
+  if (empty($_POST["email"])) {
+    $emailErr = "Email is required";
+  } else {
+    $email = test_input($_POST["email"]);
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      $emailErr = "Invalid email format";
+    }
+  }
+    
+  if (empty($_POST["password"])) {
+    $password = "";
+    $passwordErr = "Your password cannot be empty";
+  } else {
+    $password = test_input($_POST["password"]);
+    if (strlen($_POST["password"]) < 8) {
+        $passwordErr = "Your password must contain at least 8 characters!";
+    }
+    if (strlen($_POST["password"]) >= 21) {
+        $passwordErr = "Your password must montain no more than 20 characters!";
+    }
+    elseif(!preg_match("/[0-9]+/",$password)) {
+        $passwordErr = "Your password must montain at least 1 number!";
+    }
+    elseif(!preg_match("/[A-Z]+/",$password)) {
+        $passwordErr = "Your password must montain at least 1 capital letter!";
+    }
+    elseif(!preg_match("/[a-z]+/",$password)) {
+        $passwordErr = "Your password must montain at least 1 lowercase letter!";
+    }
+  }
+
+if( (!$nameErr) && (!$emailErr) && (!$passwordErr) ){
+    $userExists = App\config\DB::getUserByMail($email);
+    if($userExists) {
+        $emailErr = 'User with this e-mail address already registered<br>Forgot your password? <a href="/user/passwordrecovery/?email='.$email.'">Recover it</a>';
+    }
+}
+
+if( (!$nameErr) && (!$emailErr) && (!$passwordErr) ){
+    $createdAt=$updatedAt=date("YmdHis");
+    $email = strtolower($email);
+    $userSignUp = App\config\DB::createUser($username,$email,$password,$createdAt,$updatedAt,$_SERVER['REMOTE_ADDR']);
+    if( $userSignUp ){
+        $id = md5($createdAt . (App\config\DB::getUserByMail($email))['id']);
+        mkdir(UPLOAD_DIR . $id);
+        $_SESSION['id'] = $id;
+        $_SESSION['username'] = $username;
+        echo '<script>swal("Successfully registered!", "You will be redirected to the login page shortly.", "success");</script>';
+        header('Refresh: 7; URL=/user/login');
+    }
+}
+
+
+
+}
+
+function test_input($data) {
+  $data = trim($data);
+  $data = stripslashes($data);
+  $data = htmlspecialchars($data);
+  return $data;
+}
+
+?>
+
+<form  method="post" action="<?php echo str_replace('/index.php','', htmlspecialchars($_SERVER["PHP_SELF"]) );?>" autocomplete="off" >
+            <h1 class="title">Create an account</h1>
+                <fieldset><legend>Create your account here</legend>
+            <label for="username">Username<sup>*<span class="required">Mandatory field</span></sup></label>
+            <input type="text" name="username" id="username" placeholder="Username" required value="<?=$username;?>" >
+            <span class="error"><?php echo $nameErr;?></span>
+
+            <label for="email">Email <sup>*<span class="required">Mandatory field</span></sup></label>
+            <input type="email" name="email" id="email" placeholder="E-mail" required value="<?=$email;?>" >
+            <span class="error"><?php echo $emailErr;?></span>
+
+            <label for="password">Password <sup>*<span class="required">Mandatory field</span></sup></label>
+            <input type="password" name="password" id="password" placeholder="Password" required value="<?=$password;?>" >
+            <span class="error"><?=$passwordErr;?></span>
+
+            <input type="submit" value="Create">
+        </fieldset>
+        </form>
+        <div class="link">
+            Already have an account? <a href="/user/login">Log in</a>
+        </div>
