@@ -1,4 +1,4 @@
-# HW-04
+# Gallery
 
 Social-network-like file uploader made in terms of homework for Skillfactory course.
 
